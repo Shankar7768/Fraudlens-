@@ -1,57 +1,47 @@
-# Byte-compiled / optimized / DLL files
+# Python & Bytecode
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
-
-# Distribution / packaging
 .Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
 
-# Virtual environments
-.env
-.venv
+# Virtual Environments
+.venv/
 env/
 venv/
 ENV/
-env.bak/
-venv.bak/
 
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-
-# Project data artifacts (keep directory structure)
+# Data & Datasets (Non-CSV files / SQLite / JSON Lines / Parquet)
 data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
 
-# Pytest / Coverage
+# Model weights & large binary artifacts
+models/*
+!models/.gitkeep
+*.pt
+*.bin
+*.joblib
+*.pkl
+*.onnx
+
+# Environment & Secret Keys
+.env
+.env.local
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Pytest & Coverage
 .pytest_cache/
 .coverage
 htmlcov/
 
-# OS specific
-.DS_Store
-Thumbs.db
+# Node / Frontend build artifacts (when frontend is built)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
