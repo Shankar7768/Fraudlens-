@@ -16,6 +16,10 @@ data/raw/*
 !data/raw/.gitkeep
 data/processed/*
 !data/processed/.gitkeep
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
 
 # Model weights & large binary artifacts
 models/*
