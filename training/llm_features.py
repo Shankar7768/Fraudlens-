@@ -1,4 +1,16 @@
+import os
 import json
+from dotenv import load_dotenv
+from google import genai
+
+load_dotenv()
+
+API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not API_KEY:
+    raise ValueError("GEMINI_API_KEY not found in .env")
+
+client = genai.Client(api_key=API_KEY)
 
 
 FEATURES = [
@@ -32,7 +44,7 @@ Features:
 Job Posting:
 {job_text}
 
-JSON format:
+Return JSON in exactly this format:
 {{
     "payment_request": 0,
     "unrealistic_salary": 0,
@@ -48,14 +60,38 @@ JSON format:
 """
 
 
-def validate_features(response_text):
-    try:
-        features = json.loads(response_text)
+def extract_llm_features(job_text):
+    prompt = create_feature_prompt(job_text)
 
-        return {
-            feature: int(features.get(feature, 0))
-            for feature in FEATURES
-        }
+    response = client.models.generate_content(
+        model="gemini-3.6-flash",
+        contents=prompt
+    )
 
-    except (json.JSONDecodeError, ValueError, TypeError):
-        return {feature: 0 for feature in FEATURES}
+    response_text = response.text.strip()
+
+    # Remove Markdown code fences if Gemini adds them
+    if response_text.startswith("```"):
+        response_text = response_text.replace("```json", "")
+        response_text = response_text.replace("```", "")
+        response_text = response_text.strip()
+
+    features = json.loads(response_text)
+
+    return {
+        feature: int(features.get(feature, 0))
+        for feature in FEATURES
+    }
+
+
+if __name__ == "__main__":
+    sample_job = """
+    We are hiring immediately. Earn $10,000 per month working from home.
+    No experience required. Send your bank details and pay a registration fee
+    to start immediately.
+    """
+
+    features = extract_llm_features(sample_job)
+
+    print("LLM feature extraction successful.")
+    print(json.dumps(features, indent=2))
