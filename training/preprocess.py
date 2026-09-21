@@ -1,5 +1,8 @@
 import pandas as pd
-from database import load_job_postings
+try:
+    from database import load_job_postings
+except ImportError:
+    from training.database import load_job_postings
 
 
 TEXT_COLUMNS = [
