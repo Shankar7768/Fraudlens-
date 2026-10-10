@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudLens - Fake Job Detection</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            color: #1f2937;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1100px;
+            margin: 40px auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 36px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 220px;
+            padding: 15px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            resize: vertical;
+            font-size: 15px;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #2563eb;
+        }
+
+        button {
+            margin-top: 15px;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #2563eb;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .result {
+            display: none;
+        }
+
+        .prediction {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .prediction h2 {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .prediction p {
+            font-size: 18px;
+        }
+
+        .fraud {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .genuine {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 18px;
+            text-align: center;
+        }
+
+        .stat h3 {
+            font-size: 14px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
+        .stat p {
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        .section-title {
+            margin: 20px 0 12px;
+            font-size: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        th {
+            background: #f9fafb;
+        }
+
+        .error {
+            display: none;
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        @media (max-width: 700px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .container {
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+            <h1>FraudLens</h1>
+            <p>Explainable Fake Job Detection Using LLM-Assisted Feature Engineering</p>
+        </div>
+
+        <div class="card">
+            <h2>Analyze Job Posting</h2>
+
+            <br>
+
+            <textarea id="jobText" placeholder="Paste the job posting here..."></textarea>
+
+            <button id="analyzeButton" onclick="analyzeJob()">
+                Analyze Job
+            </button>
+
+            <div id="errorMessage" class="error"></div>
+        </div>
+
+        <div id="result" class="card result">
+
+            <div id="predictionBox" class="prediction">
+                <h2 id="prediction"></h2>
+                <p id="probability"></p>
+            </div>
+
+            <div class="stats">
+
+                <div class="stat">
+                    <h3>Risk Level</h3>
+                    <p id="riskLevel"></p>
+                </div>
+
+                <div class="stat">
+                    <h3>Fraud Probability</h3>
+                    <p id="fraudProbability"></p>
+                </div>
+
+                <div class="stat">
+                    <h3>Active Risk Flags</h3>
+                    <p id="riskFlags"></p>
+                </div>
+
+            </div>
+
+            <h2 class="section-title">Risk Indicators</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Risk Indicator</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody id="riskTable"></tbody>
+            </table>
+
+            <h2 class="section-title">Top SHAP Features</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Type</th>
+                        <th>SHAP Impact</th>
+                        <th>Direction</th>
+                    </tr>
+                </thead>
+
+                <tbody id="shapTable"></tbody>
+            </table>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        async function analyzeJob() {
+
+            const jobText = document.getElementById("jobText").value.trim();
+            const button = document.getElementById("analyzeButton");
+            const resultBox = document.getElementById("result");
+            const errorBox = document.getElementById("errorMessage");
+
+            errorBox.style.display = "none";
+
+            if (!jobText) {
+                errorBox.textContent = "Please enter a job posting.";
+                errorBox.style.display = "block";
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = "Analyzing...";
+
+            try {
+
+                const response = await fetch(
+                    "http://127.0.0.1:8000/predict",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            job_text: jobText,
+                            top_k: 10
+                        })
+                    }
+                );
+
+                if (!response.ok) {
+                    throw new Error("API request failed.");
+                }
+
+                const data = await response.json();
+
+                displayResults(data);
+
+            } catch (error) {
+
+                errorBox.textContent =
+                    "Could not connect to the FraudLens API. Make sure the FastAPI server is running.";
+
+                errorBox.style.display = "block";
+
+            } finally {
+
+                button.disabled = false;
+                button.textContent = "Analyze Job";
+
+            }
+        }
+
+
+        function displayResults(data) {
+
+            const prediction = data.prediction;
+            const fraudProbability = data.fraud_probability;
+            const genuineProbability = data.genuine_probability;
+
+            const predictionBox =
+                document.getElementById("predictionBox");
+
+            document.getElementById("prediction").textContent =
+                prediction;
+
+            document.getElementById("probability").textContent =
+                "Fraud Probability: " +
+                (fraudProbability * 100).toFixed(2) +
+                "% | Genuine Probability: " +
+                (genuineProbability * 100).toFixed(2) +
+                "%";
+
+            document.getElementById("riskLevel").textContent =
+                data.risk_level;
+
+            document.getElementById("fraudProbability").textContent =
+                (fraudProbability * 100).toFixed(2) + "%";
+
+            document.getElementById("riskFlags").textContent =
+                data.active_risk_flags + " / 10";
+
+            predictionBox.className = "prediction";
+
+            if (prediction === "FRAUDULENT") {
+                predictionBox.classList.add("fraud");
+            } else {
+                predictionBox.classList.add("genuine");
+            }
+
+            const riskTable =
+                document.getElementById("riskTable");
+
+            riskTable.innerHTML = "";
+
+            for (const [feature, value] of Object.entries(
+                data.risk_indicators
+            )) {
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+            <td>${feature}</td>
+            <td>${value === 1 ? "FLAGGED" : "Clear"}</td>
+        `;
+
+                riskTable.appendChild(row);
+            }
+
+            const shapTable =
+                document.getElementById("shapTable");
+
+            shapTable.innerHTML = "";
+
+            data.top_shap_features.forEach(feature => {
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+            <td>${feature.feature_name}</td>
+            <td>${feature.feature_type}</td>
+            <td>${feature.shap_value.toFixed(4)}</td>
+            <td>${feature.impact_direction}</td>
+        `;
+
+                shapTable.appendChild(row);
+
+            });
+
+            document.getElementById("result").style.display =
+                "block";
+        }
+
+    </script>
+
+</body>
+
+</html>

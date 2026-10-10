@@ -23,6 +23,7 @@ data/features/*
 *.sqlite
 *.sqlite3
 data/*.db
+*.zip
 
 # Model weights & large binary artifacts
 models/*

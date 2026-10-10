@@ -63,14 +63,19 @@ def rule_based_features(job_text):
         ))
     )
 
+        
     # Unrealistic salary
     features["unrealistic_salary"] = int(
         bool(re.search(
-            r"\$\s*(?:[1-9]\d{3,}|[1-9]\d{4,})|"
-            r"(?:10,000|15000|20000|30000)\s*(?:per|/)\s*month",
+            r"(?:₹|rs\.?|inr|\$)\s*"
+            r"(?:10,000|15,000|20,000|30,000|50,000)"
+            r"\s*(?:per|/)\s*(?:day|week)|"
+            r"(?:10,000|15000|20000|30000|50000)"
+            r"\s*(?:per|/)\s*day",
             text
         ))
     )
+
 
     # Urgency
     features["urgency"] = int(
@@ -145,16 +150,20 @@ def rule_based_features(job_text):
         ))
     )
 
+       
     # Too good to be true
     features["too_good_to_be_true"] = int(
         bool(re.search(
-            r"earn.*\$?\d+.*(?:daily|weekly|monthly)|"
+            r"earn.*(?:₹|rs\.?|inr|\$)?\s*\d[\d,]*.*"
+            r"(?:daily|per day|/day|weekly|per week|/week|"
+            r"monthly|per month|/month)|"
             r"guaranteed income|guaranteed earnings|"
             r"easy money|work.*few hours.*earn|"
             r"no experience.*high salary",
             text
         ))
     )
+
 
     return features
 
