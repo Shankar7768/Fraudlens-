@@ -106,11 +106,14 @@ class FraudPredictor:
         x = features_data["combined_vector"]
 
         # Classification Inference
-        predicted_class = int(self.model.predict(x)[0])
         probabilities = self.model.predict_proba(x)[0]
         fraud_prob = float(probabilities[1])
         genuine_prob = float(probabilities[0])
 
+        # Use the provisional 0.30 threshold for the fraud verdict
+        FRAUD_THRESHOLD = 0.30
+        predicted_class = 1 if fraud_prob >= FRAUD_THRESHOLD else 0
+        
         # Categorize risk level
         if fraud_prob >= 0.70:
             risk_level = "HIGH RISK"

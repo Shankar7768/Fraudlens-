@@ -2,9 +2,9 @@ import os
 import numpy as np
 import torch
 
-from database import load_job_postings
-from preprocess import preprocess_data
-from roberta_embeddings import RoBERTaEmbedder
+from training.database import load_job_postings
+from training.preprocess import preprocess_data
+from training.roberta_embeddings import RoBERTaEmbedder
 
 
 OUTPUT_PATH = "data/features/roberta_embeddings.npy"

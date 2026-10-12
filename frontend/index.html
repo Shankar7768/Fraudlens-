@@ -9,67 +9,62 @@
     <style>
         * {
             box-sizing: border-box;
-            margin: 0;
-            padding: 0;
             font-family: Arial, sans-serif;
         }
 
         body {
-            background: #f4f7fb;
-            color: #1f2937;
-            min-height: 100vh;
+            margin: 0;
+            background: #f3f6fb;
+            color: #172033;
         }
 
         .container {
-            width: 90%;
-            max-width: 1100px;
-            margin: 40px auto;
+            width: 92%;
+            max-width: 1000px;
+            margin: 35px auto;
         }
 
-        .header {
+        header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
         }
 
-        .header h1 {
-            font-size: 36px;
+        header h1 {
+            color: #173b75;
+            font-size: 38px;
             margin-bottom: 8px;
         }
 
-        .header p {
-            color: #6b7280;
-            font-size: 16px;
+        header p {
+            color: #64748b;
+            line-height: 1.5;
         }
 
         .card {
             background: white;
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            padding: 24px;
+            margin-bottom: 22px;
+            border-radius: 14px;
+            box-shadow: 0 5px 22px rgba(25, 45, 80, 0.08);
         }
 
         textarea {
             width: 100%;
-            min-height: 220px;
-            padding: 15px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            resize: vertical;
+            min-height: 210px;
+            padding: 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 9px;
             font-size: 15px;
-            outline: none;
-        }
-
-        textarea:focus {
-            border-color: #2563eb;
+            line-height: 1.5;
+            resize: vertical;
         }
 
         button {
-            margin-top: 15px;
             width: 100%;
+            margin-top: 14px;
             padding: 14px;
             border: none;
-            border-radius: 8px;
+            border-radius: 9px;
             background: #2563eb;
             color: white;
             font-size: 16px;
@@ -82,212 +77,371 @@
         }
 
         button:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
+            background: #94a3b8;
+            cursor: wait;
+        }
+
+        .muted {
+            color: #64748b;
+            font-size: 13px;
+            line-height: 1.5;
         }
 
         .result {
             display: none;
         }
 
-        .prediction {
-            text-align: center;
+        .verdict {
             padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            border-radius: 11px;
+            margin-bottom: 18px;
         }
 
-        .prediction h2 {
-            font-size: 30px;
-            margin-bottom: 10px;
-        }
-
-        .prediction p {
-            font-size: 18px;
-        }
-
-        .fraud {
+        .verdict.fraud {
             background: #fee2e2;
             color: #991b1b;
         }
 
-        .genuine {
+        .verdict.genuine {
             background: #dcfce7;
             color: #166534;
         }
 
-        .stats {
+        .verdict h2 {
+            font-size: 27px;
+            margin-top: 0;
+        }
+
+        .verdict p {
+            line-height: 1.5;
+        }
+
+        .metrics {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin: 18px 0;
         }
 
-        .stat {
-            background: #f9fafb;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 18px;
-            text-align: center;
+        .metric {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 17px;
         }
 
-        .stat h3 {
+        .metric .label {
+            color: #64748b;
             font-size: 14px;
-            color: #6b7280;
             margin-bottom: 8px;
         }
 
-        .stat p {
-            font-size: 22px;
+        .metric .value {
+            font-size: 28px;
             font-weight: bold;
         }
 
+        .bar {
+            height: 8px;
+            margin-top: 10px;
+            border-radius: 10px;
+            background: #e2e8f0;
+            overflow: hidden;
+        }
+
+        .bar span {
+            display: block;
+            height: 100%;
+            width: 0;
+        }
+
+        .fraud-fill {
+            background: #dc2626;
+        }
+
+        .genuine-fill {
+            background: #16a34a;
+        }
+
+        .notice {
+            display: none;
+            padding: 14px;
+            margin: 16px 0;
+            border-radius: 9px;
+            line-height: 1.5;
+            background: #fff7ed;
+            color: #9a3412;
+            border: 1px solid #fed7aa;
+        }
+
         .section-title {
-            margin: 20px 0 12px;
+            margin: 24px 0 12px;
             font-size: 20px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .reason-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            gap: 10px;
         }
 
-        th,
-        td {
-            padding: 10px;
-            border-bottom: 1px solid #e5e7eb;
-            text-align: left;
-            font-size: 14px;
+        .reason {
+            padding: 13px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 9px;
+            line-height: 1.5;
         }
 
-        th {
-            background: #f9fafb;
+        .reason.flagged {
+            border-left: 5px solid #dc2626;
+        }
+
+        .reason.clear {
+            border-left: 5px solid #16a34a;
+        }
+
+        .reason strong {
+            display: block;
+            margin-bottom: 5px;
         }
 
         .error {
             display: none;
+            margin-top: 14px;
+            padding: 12px;
             background: #fee2e2;
             color: #991b1b;
-            padding: 15px;
             border-radius: 8px;
-            margin-top: 15px;
         }
 
-        @media (max-width: 700px) {
-            .stats {
-                grid-template-columns: 1fr;
+        .recommendation {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 16px;
+            line-height: 1.6;
+            margin-top: 18px;
+        }
+
+        @media (max-width: 620px) {
+            .container {
+                margin: 20px auto;
             }
 
-            .container {
-                width: 95%;
+            .card {
+                padding: 17px;
+            }
+
+            .metrics {
+                grid-template-columns: 1fr;
             }
         }
     </style>
 </head>
 
 <body>
+    <main class="container">
 
-    <div class="container">
-
-        <div class="header">
+        <header>
             <h1>FraudLens</h1>
-            <p>Explainable Fake Job Detection Using LLM-Assisted Feature Engineering</p>
-        </div>
+            <p>
+                Explainable Fake Job Detection Using
+                LLM-Assisted Feature Engineering
+            </p>
+        </header>
 
-        <div class="card">
-            <h2>Analyze Job Posting</h2>
+        <section class="card">
+            <h2>Analyze a Job Posting</h2>
 
-            <br>
+            <p class="muted">
+                Paste a job advertisement below to check its estimated
+                fraud probability and understand the warning signs.
+            </p>
 
-            <textarea id="jobText" placeholder="Paste the job posting here..."></textarea>
+            <textarea id="jobText" placeholder="Paste the complete job posting here..."></textarea>
 
             <button id="analyzeButton" onclick="analyzeJob()">
-                Analyze Job
+                Analyze Job Posting
             </button>
 
             <div id="errorMessage" class="error"></div>
-        </div>
+        </section>
 
-        <div id="result" class="card result">
+        <section id="result" class="card result">
 
-            <div id="predictionBox" class="prediction">
+            <div id="predictionBox" class="verdict">
                 <h2 id="prediction"></h2>
-                <p id="probability"></p>
+                <p id="summary"></p>
+                <p id="riskLevel"></p>
             </div>
 
-            <div class="stats">
+            <div class="metrics">
 
-                <div class="stat">
-                    <h3>Risk Level</h3>
-                    <p id="riskLevel"></p>
+                <div class="metric">
+                    <div class="label">Genuine Probability</div>
+                    <div id="genuineProbability" class="value">—</div>
+
+                    <div class="bar">
+                        <span id="genuineBar" class="genuine-fill"></span>
+                    </div>
                 </div>
 
-                <div class="stat">
-                    <h3>Fraud Probability</h3>
-                    <p id="fraudProbability"></p>
-                </div>
+                <div class="metric">
+                    <div class="label">Fraud Probability</div>
+                    <div id="fraudProbability" class="value">—</div>
 
-                <div class="stat">
-                    <h3>Active Risk Flags</h3>
-                    <p id="riskFlags"></p>
+                    <div class="bar">
+                        <span id="fraudBar" class="fraud-fill"></span>
+                    </div>
                 </div>
 
             </div>
 
-            <h2 class="section-title">Risk Indicators</h2>
+            <div id="conflictNotice" class="notice"></div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Risk Indicator</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
+            <h2 class="section-title">
+                Why did FraudLens give this result?
+            </h2>
 
-                <tbody id="riskTable"></tbody>
-            </table>
+            <p class="muted">
+                These explanations describe the warning checks performed
+                by the system. A warning sign is not proof of fraud.
+            </p>
 
-            <h2 class="section-title">Top SHAP Features</h2>
+            <ul id="reasonList" class="reason-list"></ul>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>Feature</th>
-                        <th>Type</th>
-                        <th>SHAP Impact</th>
-                        <th>Direction</th>
-                    </tr>
-                </thead>
+            <div class="recommendation">
+                <strong>What should you do?</strong>
+                <p id="recommendation"></p>
+            </div>
 
-                <tbody id="shapTable"></tbody>
-            </table>
+            <p class="muted">
+                Probabilities are model estimates, not guarantees.
+                Always verify the employer independently.
+            </p>
 
-        </div>
-
-    </div>
+        </section>
+    </main>
 
     <script>
+        const indicatorInfo = {
+            payment_request: {
+                title: "Payment or registration fee requested",
+                flagged:
+                    "The posting appears to ask applicants to pay a fee. " +
+                    "Legitimate employers generally do not charge candidates " +
+                    "to secure a job.",
+                clear:
+                    "The payment check did not detect a clear request for a fee."
+            },
+
+            unrealistic_salary: {
+                title: "Salary may be unusually high",
+                flagged:
+                    "The salary pattern may be unrealistic for the role. " +
+                    "Verify the salary and responsibilities with the employer.",
+                clear:
+                    "The salary check did not detect its configured warning pattern. " +
+                    "This does not prove the salary is genuine."
+            },
+
+            urgency: {
+                title: "Pressure to act quickly",
+                flagged:
+                    "Urgent wording was detected. Pressure to act immediately " +
+                    "can discourage applicants from checking an offer.",
+                clear:
+                    "The urgency check did not detect its configured warning pattern."
+            },
+
+            personal_information_request: {
+                title: "Sensitive personal information requested",
+                flagged:
+                    "The posting may request sensitive information. Verify the " +
+                    "employer before sharing identity or banking details.",
+                clear:
+                    "The system did not detect its configured sensitive-information pattern."
+            },
+
+            suspicious_contact: {
+                title: "Unverified contact method",
+                flagged:
+                    "The recruiter contact method may be difficult to verify. " +
+                    "Confirm the recruiter through the company's official website.",
+                clear:
+                    "The contact check did not detect its configured warning pattern."
+            },
+
+            missing_company_information: {
+                title: "Company information is missing",
+                flagged:
+                    "The posting may lack verifiable employer details. Look for " +
+                    "an official website and an independently verifiable job listing.",
+                clear:
+                    "The company-information check did not flag missing details."
+            },
+
+            vague_job_description: {
+                title: "Job responsibilities are unclear",
+                flagged:
+                    "The description may be vague about daily duties. Ask for " +
+                    "a clear job description before proceeding.",
+                clear:
+                    "The description check did not flag its configured warning pattern."
+            },
+
+            no_experience_required: {
+                title: "No experience required",
+                flagged:
+                    "No experience is required according to the posting. This can " +
+                    "be legitimate, but deserves extra scrutiny when combined with " +
+                    "high pay or a fee request.",
+                clear:
+                    "The system did not flag its configured no-experience pattern."
+            },
+
+            suspicious_url: {
+                title: "Potentially suspicious link",
+                flagged:
+                    "A suspicious URL pattern was detected. Verify the destination " +
+                    "before entering personal information.",
+                clear:
+                    "The URL check did not detect its configured warning pattern."
+            },
+
+            too_good_to_be_true: {
+                title: "Offer may sound too good to be true",
+                flagged:
+                    "The wording resembles an easy-money or unrealistic-earnings " +
+                    "claim. Verify the details carefully.",
+                clear:
+                    "The system did not flag its configured too-good-to-be-true pattern."
+            }
+        };
 
         async function analyzeJob() {
+            const jobText =
+                document.getElementById("jobText").value.trim();
 
-            const jobText = document.getElementById("jobText").value.trim();
-            const button = document.getElementById("analyzeButton");
-            const resultBox = document.getElementById("result");
-            const errorBox = document.getElementById("errorMessage");
+            const button =
+                document.getElementById("analyzeButton");
+
+            const errorBox =
+                document.getElementById("errorMessage");
 
             errorBox.style.display = "none";
 
             if (!jobText) {
-                errorBox.textContent = "Please enter a job posting.";
+                errorBox.textContent =
+                    "Please paste a job posting before analyzing.";
+
                 errorBox.style.display = "block";
                 return;
             }
 
             button.disabled = true;
-            button.textContent = "Analyzing...";
+            button.textContent = "Analyzing posting...";
 
             try {
-
                 const response = await fetch(
                     "http://127.0.0.1:8000/predict",
                     {
@@ -303,110 +457,196 @@
                 );
 
                 if (!response.ok) {
-                    throw new Error("API request failed.");
+                    throw new Error("The FraudLens API returned an error.");
                 }
 
                 const data = await response.json();
-
                 displayResults(data);
 
             } catch (error) {
-
                 errorBox.textContent =
-                    "Could not connect to the FraudLens API. Make sure the FastAPI server is running.";
+                    "Could not connect to FraudLens. Make sure the " +
+                    "backend server is running at http://127.0.0.1:8000.";
 
                 errorBox.style.display = "block";
 
             } finally {
-
                 button.disabled = false;
-                button.textContent = "Analyze Job";
-
+                button.textContent = "Analyze Job Posting";
             }
         }
 
-
         function displayResults(data) {
+            const fraud = Number(data.fraud_probability);
+            const genuine = Number(data.genuine_probability);
 
-            const prediction = data.prediction;
-            const fraudProbability = data.fraud_probability;
-            const genuineProbability = data.genuine_probability;
+            const prediction =
+                String(data.prediction || "UNKNOWN").toUpperCase();
+
+            const indicators = data.risk_indicators || {};
+
+            const flagged = Object.entries(indicators)
+                .filter(([key, value]) => Number(value) === 1);
+
+            const riskCount = Number(
+                data.active_risk_flags ?? flagged.length
+            );
+
+            document.getElementById("prediction").textContent =
+                prediction === "FRAUDULENT"
+                    ? "Potentially Fraudulent Posting"
+                    : prediction === "GENUINE"
+                        ? "Predicted Genuine Posting"
+                        : "Prediction Result";
+
+            document.getElementById("summary").textContent =
+                prediction === "FRAUDULENT"
+                    ? "The trained model estimates that this posting resembles fraudulent job advertisements."
+                    : prediction === "GENUINE"
+                        ? "The trained model estimates that this posting resembles genuine job advertisements. Check the warning signs below too."
+                        : "The model returned a result that needs further review.";
+
+            document.getElementById("riskLevel").textContent =
+                "Model risk level: " + humanRisk(data.risk_level) +
+                " | " + riskCount + " of 10 warning checks flagged";
 
             const predictionBox =
                 document.getElementById("predictionBox");
 
-            document.getElementById("prediction").textContent =
-                prediction;
+            predictionBox.className =
+                "verdict " +
+                (prediction === "FRAUDULENT" ? "fraud" : "genuine");
 
-            document.getElementById("probability").textContent =
-                "Fraud Probability: " +
-                (fraudProbability * 100).toFixed(2) +
-                "% | Genuine Probability: " +
-                (genuineProbability * 100).toFixed(2) +
-                "%";
-
-            document.getElementById("riskLevel").textContent =
-                data.risk_level;
+            document.getElementById("genuineProbability").textContent =
+                Number.isFinite(genuine)
+                    ? (genuine * 100).toFixed(2) + "%"
+                    : "Unavailable";
 
             document.getElementById("fraudProbability").textContent =
-                (fraudProbability * 100).toFixed(2) + "%";
+                Number.isFinite(fraud)
+                    ? (fraud * 100).toFixed(2) + "%"
+                    : "Unavailable";
 
-            document.getElementById("riskFlags").textContent =
-                data.active_risk_flags + " / 10";
+            document.getElementById("genuineBar").style.width =
+                Number.isFinite(genuine)
+                    ? Math.max(0, Math.min(100, genuine * 100)) + "%"
+                    : "0%";
 
-            predictionBox.className = "prediction";
+            document.getElementById("fraudBar").style.width =
+                Number.isFinite(fraud)
+                    ? Math.max(0, Math.min(100, fraud * 100)) + "%"
+                    : "0%";
 
-            if (prediction === "FRAUDULENT") {
-                predictionBox.classList.add("fraud");
+            const notice =
+                document.getElementById("conflictNotice");
+
+            const importantFlags = [
+                "payment_request",
+                "suspicious_contact",
+                "unrealistic_salary",
+                "suspicious_url"
+            ];
+
+            const importantFlagFound = importantFlags.some(
+                key => Number(indicators[key]) === 1
+            );
+
+            if (
+                prediction === "GENUINE" &&
+                (riskCount >= 3 || importantFlagFound)
+            ) {
+                notice.textContent =
+                    "Important: the model predicts GENUINE, but warning signs " +
+                    "were detected. The prediction and warning checks do not fully " +
+                    "agree. Treat this posting cautiously and verify the employer.";
+
+                notice.style.display = "block";
+
+            } else if (
+                prediction === "FRAUDULENT" &&
+                riskCount === 0
+            ) {
+                notice.textContent =
+                    "The model predicts FRAUDULENT, but none of the named warning " +
+                    "checks was flagged. Review the posting carefully.";
+
+                notice.style.display = "block";
+
             } else {
-                predictionBox.classList.add("genuine");
+                notice.style.display = "none";
             }
 
-            const riskTable =
-                document.getElementById("riskTable");
+            const reasonList =
+                document.getElementById("reasonList");
 
-            riskTable.innerHTML = "";
+            reasonList.replaceChildren();
 
-            for (const [feature, value] of Object.entries(
-                data.risk_indicators
-            )) {
+            Object.keys(indicatorInfo).forEach(key => {
+                if (!(key in indicators)) return;
 
-                const row = document.createElement("tr");
+                const isFlagged = Number(indicators[key]) === 1;
 
-                row.innerHTML = `
-            <td>${feature}</td>
-            <td>${value === 1 ? "FLAGGED" : "Clear"}</td>
-        `;
+                const item = document.createElement("li");
+                item.className =
+                    "reason " + (isFlagged ? "flagged" : "clear");
 
-                riskTable.appendChild(row);
-            }
+                const heading = document.createElement("strong");
+                heading.textContent =
+                    (isFlagged ? "⚠ Warning sign: " : "✓ Check not flagged: ") +
+                    indicatorInfo[key].title;
 
-            const shapTable =
-                document.getElementById("shapTable");
+                const detail = document.createElement("span");
+                detail.textContent = isFlagged
+                    ? indicatorInfo[key].flagged
+                    : indicatorInfo[key].clear;
 
-            shapTable.innerHTML = "";
-
-            data.top_shap_features.forEach(feature => {
-
-                const row = document.createElement("tr");
-
-                row.innerHTML = `
-            <td>${feature.feature_name}</td>
-            <td>${feature.feature_type}</td>
-            <td>${feature.shap_value.toFixed(4)}</td>
-            <td>${feature.impact_direction}</td>
-        `;
-
-                shapTable.appendChild(row);
-
+                item.append(heading, detail);
+                reasonList.appendChild(item);
             });
 
-            document.getElementById("result").style.display =
-                "block";
+            const recommendation =
+                document.getElementById("recommendation");
+
+            if (Number(indicators.payment_request) === 1) {
+                recommendation.textContent =
+                    "Do not pay a registration or application fee. Verify the " +
+                    "company and recruiter using contact details you find independently.";
+
+            } else if (
+                prediction === "FRAUDULENT" ||
+                riskCount >= 3 ||
+                importantFlagFound
+            ) {
+                recommendation.textContent =
+                    "Do not share sensitive information or make payments until " +
+                    "the employer, recruiter, salary, and job listing have been verified.";
+
+            } else {
+                recommendation.textContent =
+                    "No warning check guarantees that a job is safe. Verify the " +
+                    "employer and check its official careers page before proceeding.";
+            }
+
+            document.getElementById("result").style.display = "block";
+
+            document.getElementById("result").scrollIntoView({
+                behavior: "smooth",
+                block: "start"
+            });
         }
 
-    </script>
+        function humanRisk(value) {
+            const risk = String(value || "unknown")
+                .toLowerCase()
+                .replaceAll("_", " ");
 
+            if (risk.includes("low")) return "Low";
+            if (risk.includes("medium")) return "Medium";
+            if (risk.includes("high")) return "High";
+
+            return risk;
+        }
+    </script>
 </body>
 
 </html>

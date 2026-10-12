@@ -74,8 +74,9 @@ def evaluate_model(model, X, y, dataset_name="Evaluation"):
     """
     Evaluate the model on a given dataset and return performance metrics.
     """
-    y_pred = model.predict(X)
     y_prob = model.predict_proba(X)[:, 1]
+    FRAUD_THRESHOLD = 0.30
+    y_pred = (y_prob >= FRAUD_THRESHOLD).astype(int)
 
     metrics = {
         "accuracy": float(accuracy_score(y, y_pred)),

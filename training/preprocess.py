@@ -16,14 +16,18 @@ TEXT_COLUMNS = [
 
 def preprocess_data():
     df = load_job_postings()
+    df = df.sort_values("job_id").reset_index(drop=True)
 
     # Replace missing values in text columns
     for column in TEXT_COLUMNS:
         df[column] = df[column].fillna("").astype(str)
 
-    # Combine important job-posting text
+    # Combine important job-posting text, including salary
+    df["salary_range"] = df["salary_range"].fillna("").astype(str)
+
     df["job_text"] = (
         "Title: " + df["title"] +
+        "\nSalary Range: " + df["salary_range"] +
         "\nCompany Profile: " + df["company_profile"] +
         "\nDescription: " + df["description"] +
         "\nRequirements: " + df["requirements"] +
