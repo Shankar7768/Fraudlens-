@@ -41,33 +41,33 @@ def save_results(results):
         json.dump(results, file, indent=2)
 
 
+
 def rule_based_features(job_text):
     """Extract ten deterministic job-posting warning indicators."""
 
     text = str(job_text or "").lower()
     features = {}
 
-    
-    # 1. Payment or money request
+    # 1. Payment requests associated with recruitment or onboarding
     features["payment_request"] = int(
         bool(re.search(
-            r"registration.{0,30}fee|"
-            r"training.{0,30}fee|"
-            r"application.{0,30}fee|"
-            r"processing.{0,30}fee|"
+            r"(?:(?:pay|send|transfer|submit).{0,50}"
+            r"(?:registration|training|application|processing)"
+            r".{0,20}(?:fee|deposit|payment|money))|"
+            r"(?:(?:registration|training|application|processing)"
+            r".{0,30}(?:fee|deposit).{0,60}"
+            r"(?:before joining|before starting|to secure the job|"
+            r"to get hired|prior to joining))|"
             r"refundable.{0,30}(?:fee|deposit)|"
-            r"pay.{0,80}(?:fee|deposit|money|amount)|"
-            r"(?:fee|deposit).{0,80}(?:before|prior to|"
-            r"to secure|to receive|to get|to start)|"
-            r"payment required|"
-            r"wire transfer|send money",
+            r"pay.{0,40}(?:to get hired|to secure the job)|"
+            r"wire transfer|send money to the recruiter",
             text,
             re.IGNORECASE,
         ))
     )
 
-
-    # 2. Potentially unusual daily or weekly salary
+    # 2. Potentially unusual daily or weekly salary.
+    # This is a warning indicator, not proof that a salary is fraudulent.
     amount = r"(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d{1,2})?"
     currency = r"(?:₹|rs\.?|inr|\$)\s*"
 
@@ -82,36 +82,57 @@ def rule_based_features(job_text):
         bool(re.search(salary_pattern, text, re.IGNORECASE))
     )
 
-    # 3. Urgency
+    # 3. Urgency, especially when combined with immediate action
     features["urgency"] = int(
         bool(re.search(
             r"urgent|immediately|hiring now|apply now|act now|"
-            r"start immediately|limited time|last chance",
+            r"start immediately|limited time|last chance|"
+            r"within \d+ minutes?|today only",
             text,
+            re.IGNORECASE,
         ))
     )
 
-    # 4. Sensitive personal information
+    # 4. Sensitive information requests.
+    # Avoid flagging passport eligibility or ordinary document requirements alone.
+    sensitive_request = (
+        r"(?:send|share|submit|upload|provide|message|"
+        r"whatsapp|telegram).{0,60}"
+        r"(?:bank account details|bank details|"
+        r"credit card details|online banking credentials|"
+        r"aadhaar|aadhar|pan card|social security number|"
+        r"identity document|id proof|passport number)"
+        r"|"
+        r"(?:bank account details|bank details|"
+        r"credit card details|online banking credentials|"
+        r"aadhaar|aadhar|pan card|social security number|"
+        r"identity document|id proof|passport number)"
+        r".{0,60}(?:send|share|submit|upload|provide)"
+    )
+
     features["personal_information_request"] = int(
-        bool(re.search(
-            r"bank details|bank account|credit card|social security|"
-            r"passport|aadhar|aadhaar|pan card|identity document|"
-            r"send.{0,40}personal information|upload.{0,30}id proof",
-            text,
-        ))
+        bool(re.search(sensitive_request, text, re.IGNORECASE))
     )
 
-    # 5. Suspicious or difficult-to-verify contact
+    # 5. Contact methods that warrant additional verification.
+    # Mentioning WhatsApp or Telegram alone is not enough.
     features["suspicious_contact"] = int(
         bool(re.search(
-            r"telegram|whatsapp.{0,20}only|"
-            r"contact.{0,30}gmail|contact.{0,30}yahoo|"
-            r"contact.{0,30}hotmail|message me privately",
+            r"(?:contact|message|send|apply|submit).{0,50}"
+            r"(?:telegram|whatsapp|gmail\.com|yahoo\.com|hotmail\.com)"
+            r"|"
+            r"(?:telegram|whatsapp).{0,50}"
+            r"(?:fee|deposit|bank details|aadhaar|pan card|"
+            r"payment|personal information)"
+            r"|"
+            r"message me privately|whatsapp.{0,20}only",
             text,
+            re.IGNORECASE,
         ))
     )
 
-    # 6. Missing company information
+    # 6. Missing company information.
+    # This works with the labelled text format used by the current project.
     company_profile = ""
 
     if "company profile:" in text:
@@ -123,9 +144,10 @@ def rule_based_features(job_text):
 
     features["missing_company_information"] = int(
         len(company_profile) < 20
+        or company_profile in {"nan", "none", "not provided", "n/a"}
     )
 
-    # 7. Vague job description
+    # 7. Vague or very short job description
     description = ""
 
     if "description:" in text:
@@ -137,28 +159,37 @@ def rule_based_features(job_text):
 
     features["vague_job_description"] = int(
         len(description) < 100
+        or description in {"nan", "none", "not provided", "n/a"}
     )
 
-    # 8. No experience required
+    # 8. No experience required.
+    # This alone should not be treated as proof of fraud.
     features["no_experience_required"] = int(
         bool(re.search(
-            r"no experience|without experience|"
+            r"no experience(?: is)? required|without experience|"
             r"experience not required|freshers welcome|"
-            r"freshers can apply",
+            r"freshers can apply|no prior experience",
             text,
+            re.IGNORECASE,
         ))
     )
 
-    # 9. Suspicious URL
+    # 9. Suspicious links: do not flag every ordinary HTTP URL.
     features["suspicious_url"] = int(
         bool(re.search(
-            r"http://|bit\.ly|tinyurl|t\.co/|"
-            r"click here.{0,40}link|download.{0,40}link",
+            r"https?://(?:www\.)?"
+            r"(?:bit\.ly|tinyurl\.com|t\.co|"
+            r"cutt\.ly|is\.gd|rb\.gy|shorturl\.at)/"
+            r"|"
+            r"(?:click here|download this file).{0,50}"
+            r"(?:verify your account|claim your payment|"
+            r"enter your password|provide bank details)",
             text,
+            re.IGNORECASE,
         ))
     )
 
-    # 10. Exaggerated earnings claims
+    # 10. Exaggerated earnings and guaranteed-income claims
     features["too_good_to_be_true"] = int(
         bool(re.search(
             r"earn.{0,100}(?:₹|rs\.?|inr|\$)\s*"

@@ -1,34 +1,43 @@
 
-import numpy as np
-from sklearn.metrics import precision_score, recall_score, f1_score
 from training.xgboost_model import prepare_data
 from xgboost import XGBClassifier
+from training.generate_llm_features import rule_based_features, FEATURES
+import numpy as np
 
 MODEL_PATH = "models/xgboost_fraud_model.json"
 
-print("Loading test data...")
-_, _, X_test, _, _, y_test = prepare_data()
+suspicious_job = """
+Title: Remote Customer Support Executive – Work From Home
+Company Profile: Bright Future Global Careers offers international remote opportunities.
+Location: Remote India
+Description: We urgently need customer support executives. Earn ₹95,000 per week working two hours per day. No experience required. Start immediately without an interview. Complete registration within 30 minutes.
+Requirements: Submit Aadhaar, PAN, and bank account details.
+Benefits: Flexible hours, high weekly earnings, guaranteed payments.
+Application Process: Pay a refundable registration and training fee of ₹2,500 before joining. Send personal and banking details through WhatsApp.
+"""
 
-print("\nLoading existing trained model...")
+print("Loading the existing model...")
 model = XGBClassifier()
 model.load_model(MODEL_PATH)
 
+print("\nChecking the suspicious job's warning indicators:")
+flags = rule_based_features(suspicious_job)
+for feature in FEATURES:
+    print(f"{feature}: {flags[feature]}")
+
+print(f"\nTotal flagged: {sum(flags.values())}/10")
+
+print("\nPreparing the held-out test set...")
+_, _, X_test, _, _, y_test = prepare_data()
+
 probabilities = model.predict_proba(X_test)[:, 1]
+predictions = (probabilities >= 0.30).astype(int)
 
-print("\nTEST SET THRESHOLD COMPARISON")
-print("-" * 65)
-print(f"{'Threshold':<12}{'Precision':<12}{'Recall':<12}{'F1':<12}{'Fraud flagged':<15}")
+print(f"Test samples: {len(y_test)}")
+print(f"Test fraud cases: {int(np.sum(y_test))}")
+print(f"Predicted fraud cases: {int(np.sum(predictions))}")
 
-for threshold in [0.10, 0.15, 0.20, 0.25, 0.30, 0.40, 0.50]:
-    predictions = (probabilities >= threshold).astype(int)
-    precision = precision_score(y_test, predictions, zero_division=0)
-    recall = recall_score(y_test, predictions, zero_division=0)
-    f1 = f1_score(y_test, predictions, zero_division=0)
-    flagged = int(predictions.sum())
+print("\nSuspicious sample's warning vector:")
+print([flags[name] for name in FEATURES])
 
-    print(
-        f"{threshold:<12.2f}{precision:<12.3f}"
-        f"{recall:<12.3f}{f1:<12.3f}{flagged:<15}"
-    )
-
-print("\nNo model or dataset files were modified.")
+print("\nDiagnostic complete. No files modified.")
